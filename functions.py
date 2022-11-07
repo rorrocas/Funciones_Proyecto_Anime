@@ -58,7 +58,7 @@ def get_user_top_list(df_rating,user):
 def get_user_viewed_list(df_rating,user):
     return list(df_rating[df_rating['user_id']==user]['anime_id'])
 
-def get_recommendations(df_anime,aid):
+def get_recommendations(df_anime,indices,aid):
     anime =  get_index_from_id(df_anime,aid)
     test = list(indices[anime,1:11])
     nb = []
