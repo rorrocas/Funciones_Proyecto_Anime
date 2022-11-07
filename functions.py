@@ -39,23 +39,23 @@ def calidad_datos(data):
   summary['outliers'] = data.apply(lambda x: sum(np.where((x<summary['limit_inf'][x.name]) | (x>summary['limit_sup'][x.name]),1 ,0)) if x.name in summary['limit_inf'].dropna().index else 0)
   return pd.concat([tipos, na, na_prop, ceros, ceros_prop, summary], axis=1).sort_values('tipo')
 
-def get_nombre_from_index(index):
+def get_nombre_from_index(df_anime,index):
     return df_anime[df_anime.index == index]['name'].values[0]
 
-def get_id_from_nombre(name):
+def get_id_from_nombre(df_anime,name):
     return df_anime[df_anime.name == name]['anime_id'].values[0]
     
-def get_index_from_id(anime_id):
+def get_index_from_id(df_anime,anime_id):
     return df_anime[df_anime.anime_id == anime_id].index.values[0]
 
-def get_user_top_list(user):
+def get_user_top_list(df_rating,user):
     df_user = df_rating[df_rating['user_id']==user]
     df_rated = df_user.dropna(how = 'any')
     avg =  df_rated.rating.mean() 
     df_toplist = df_rated[df_rated['rating']>= avg].sort_values('rating', ascending = False).head(10)
     return list(df_toplist['anime_id'])
 
-def get_user_viewed_list(user):
+def get_user_viewed_list(df_rating,user):
     return list(df_rating[df_rating['user_id']==user]['anime_id'])
 
 def get_recommendations(aid):
