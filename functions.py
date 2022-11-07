@@ -67,12 +67,12 @@ def get_recommendations(df_anime,indices,aid):
         nb.append(a_name)
     return nb
 
-def get_n_recommends(df_anime,df_rating,user, n):
+def get_n_recommends(df_anime,df_rating,indices,user, n):
     vistas = list(get_user_viewed_list(df_rating,user))
     liked = list(get_user_top_list(df_rating,user))
     lista = []
     for i in liked:
-        ani = pd.Series(get_recommendations(df_anime,i))
+        ani = pd.Series(get_recommendations(df_anime,indices,i))
         recs = np.setdiff1d(ani, vistas) 
         lista.extend(recs)
         if(len(lista) > n):
