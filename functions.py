@@ -23,19 +23,57 @@ def Graficas_frecuencia(df):
             plt.xlabel('')    
     plt.tight_layout()
     return 0
+
 def calidad_datos(data):
-    tipos = pd.DataFrame({'tipo': data.dtypes},index=data.columns)
-    na = pd.DataFrame({'nulos': data.isna().sum()}, index=data.columns)
-    na_prop = pd.DataFrame({'porc_nulos':data.isna().sum()/data.shape[0]}, index=data.columns)
-    ceros = pd.DataFrame({'ceros':[data.loc[data[col]==0,col].shape[0] for col in data.columns]}, index= data.columns)
-    ceros_prop = pd.DataFrame({'porc_ceros':[data.loc[data[col]==0,col].shape[0]/data.shape[0] for col in data.columns]}, index= data.columns)
-    summary = data.describe(include='all').T
+  tipos = pd.DataFrame({'tipo': data.dtypes},index=data.columns)
+  na = pd.DataFrame({'nulos': data.isna().sum()}, index=data.columns)
+  na_prop = pd.DataFrame({'porc_nulos':data.isna().sum()/data.shape[0]}, index=data.columns)
+  ceros = pd.DataFrame({'ceros':[data.loc[data[col]==0,col].shape[0] for col in data.columns]}, index= data.columns)
+  ceros_prop = pd.DataFrame({'porc_ceros':[data.loc[data[col]==0,col].shape[0]/data.shape[0] for col in data.columns]}, index= data.columns)
+  summary = data.describe(include='all').T
+  summary['dist_IQR'] = summary['75%'] - summary['25%']
+  summary['limit_inf'] = summary['25%'] - summary['dist_IQR']*1.5
+  summary['limit_sup'] = summary['75%'] + summary['dist_IQR']*1.5
+  summary['outliers'] = data.apply(lambda x: sum(np.where((x<summary['limit_inf'][x.name]) | (x>summary['limit_sup'][x.name]),1 ,0)) if x.name in summary['limit_inf'].dropna().index else 0)
+  return pd.concat([tipos, na, na_prop, ceros, ceros_prop, summary], axis=1).sort_values('tipo')
 
-    summary['dist_IQR'] = summary['75%'] - summary['25%']
-    summary['limit_inf'] = summary['25%'] - summary['dist_IQR']*1.5
-    summary['limit_sup'] = summary['75%'] + summary['dist_IQR']*1.5
+def get_nombre_from_index(index):
+    return df_anime[df_anime.index == index]['name'].values[0]
 
-    summary['outliers'] = data.apply(lambda x: sum(np.where((x<summary['limit_inf'][x.name]) | (x>summary['limit_sup'][x.name]),1 ,0)) if x.name in summary['limit_inf'].dropna().index else 0)
+def get_id_from_nombre(name):
+    return df_anime[df_anime.name == name]['anime_id'].values[0]
+    
+def get_index_from_id(anime_id):
+    return df_anime[df_anime.anime_id == anime_id].index.values[0]
 
+def get_user_top_list(user):
+    df_user = df_rating[df_rating['user_id']==user]
+    df_rated = df_user.dropna(how = 'any')
+    avg =  df_rated.rating.mean() 
+    df_toplist = df_rated[df_rated['rating']>= avg].sort_values('rating', ascending = False).head(10)
+    return list(df_toplist['anime_id'])
 
-    return pd.concat([tipos, na, na_prop, ceros, ceros_prop, summary], axis=1).sort_values('tipo')
+def get_user_viewed_list(user):
+    return list(df_rating[df_rating['user_id']==user]['anime_id'])
+
+def get_recommendations(aid):
+    anime =  get_index_from_id(aid)
+    test = list(indices[anime,1:11])
+    nb = []
+    for i in test:
+        a_name = get_nombre_from_index(i)
+        nb.append(a_name)
+    return nb
+
+def get_n_recommends(user, n):
+    vistas = list(get_user_viewed_list(user))
+    liked = list(get_user_top_list(user))
+    lista = []
+    for i in liked:
+        ani = pd.Series(get_recommendations(i))
+        recs = np.setdiff1d(ani, vistas) 
+        lista.extend(recs)
+        if(len(lista) > n):
+            lista = lista[n:]
+            break
+    return lista
