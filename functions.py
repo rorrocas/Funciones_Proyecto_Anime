@@ -3,7 +3,16 @@ import matplotlib.pyplot as plt # Graficos
 import seaborn as sns # Graficos
 import pandas as pd
 import numpy as np
-plt.style.use('ggplot')
+
+# Definición de estilo de graficos
+%matplotlib inline
+plt.style.use('seaborn') # Gráficos estilo seaborn
+plt.rcParams["figure.figsize"] = (6, 3) # Tamaño gráficos
+plt.rcParams["figure.dpi"] = 100 # resolución gráficos
+sns.set_theme()
+
+import warnings
+warnings.filterwarnings('ignore')
 
 def Graficas_frecuencia(df):
     rows = int(np.ceil(df.shape[1] / 3))
