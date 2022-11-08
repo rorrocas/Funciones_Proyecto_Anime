@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 
 # Definición de estilo de graficos
-%matplotlib inline
 plt.style.use('seaborn') # Gráficos estilo seaborn
 plt.rcParams["figure.figsize"] = (6, 3) # Tamaño gráficos
 plt.rcParams["figure.dpi"] = 100 # resolución gráficos
